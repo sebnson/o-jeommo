@@ -1,17 +1,23 @@
 import { useRouter } from 'next/router';
+import { getRestaurantDetails, getRestaurantsFromSheet } from "../../utils/getDataFromSheet";
 
-const restaurantDetails = {
-  '1': { name: '식당 A', description: '식당 A에 대한 설명입니다.' },
-  '2': { name: '식당 B', description: '식당 B에 대한 설명입니다.' },
-  '3': { name: '식당 C', description: '식당 C에 대한 설명입니다.' },
-};
 
-export default function Details() {
+export async function getServerSideProps(context) {
+    const {params} = context;
+    const restaurantDetails = await getRestaurantDetails(params.name);
+
+    return {
+        props: {details: restaurantDetails}
+    }
+}
+
+
+export default function Details({details}) {
   const router = useRouter();
   const { id } = router.query;
 
   if (!router.isReady || !restaurantDetails[id]) {
-    return <div>Loading...</div>;
+    return <div>정보가 부족합니다.</div>;
   }
 
   const details = restaurantDetails[id];
@@ -19,7 +25,9 @@ export default function Details() {
   return (
     <div>
       <h1>{details.name}</h1>
-      <p>{details.description}</p>
+      <p>주소: {details.address}</p>
+      <p>번호: {details.phone}</p>
+      <p>추천 음식: {details.recommendDishes}</p>
     </div>
   );
 }

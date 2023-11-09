@@ -1,18 +1,25 @@
 import Link from 'next/link';
+import { getRestaurantsFromSheet } from '../utils/getDataFromSheet';
 
-const restaurants = [
-  { id: 1, name: '식당 A' },
-  { id: 2, name: '식당 B' },
-  { id: 3, name: '식당 C' },
-];
+export async function getServerSideProps(context) {
+  const { query } = context;
+  const cuisines = query.cuisines ? query.cuisines.split(',') : [];
+  const distance = query.distance ? parseInt(query.distance, 10) : 500;
 
-export default function Recommendation() {
+  const restaurants = await getRestaurantsFromSheet(cuisines, distance);
+
+  return {
+    props: { restaurants },
+  };
+}
+
+export default function Recommendation({restaurants}) {
   return (
     <div>
       <h1>식당 추천</h1>
       <ul>
         {restaurants.map((restaurant) => (
-          <li key={restaurant.id}>
+          <li key={restaurant.name}>
             <Link href={`/details/${restaurant.id}`}>
               {restaurant.name}
             </Link>
